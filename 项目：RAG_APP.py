@@ -2,6 +2,8 @@ import streamlit as st
 import tempfile
 import os
 from pathlib import Path
+import os
+os.environ['HF_ENDPOINT'] = 'https://hf-mirror.com'
 
 # LangChain 组件（注意用 langchain_community）
 from langchain_community.document_loaders import PyPDFLoader, TextLoader
@@ -10,6 +12,8 @@ from langchain_community.embeddings import HuggingFaceEmbeddings
 from langchain_community.vectorstores import Chroma
 #from langchain.chains import RetrievalQA
 from openai import OpenAI
+
+
 
 # 页面配置
 st.set_page_config(page_title="RAG知识库问答", page_icon="📚")
@@ -98,15 +102,15 @@ if st.session_state.vectorstore:
                     retriever = st.session_state.vectorstore.as_retriever(
                         search_kwargs={"k": 3}  # 返回最相关的3段
                     )
-                    docs = retriever.get_relevant_documents(prompt)
+                    #docs = retriever.get_relevant_documents(prompt)
+                    docs = retriever.invoke(prompt)
 
                     # 2. 准备上下文
                     context = "\n\n".join([doc.page_content for doc in docs])
 
                     # 3. 调用大模型
                     client = OpenAI(
-                        api_key=st.secrets["OPENAI_API_KEY"] if "OPENAI_API_KEY" in st.secrets else os.getenv(
-                            "OPENAI_API_KEY"),
+                        api_key=os.getenv("OPENAI_API_KEY"),
                         base_url="https://dashscope.aliyuncs.com/compatible-mode/v1"
                     )
 
